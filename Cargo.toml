@@ -1,0 +1,20 @@
+[package]
+name = "aspi_proxy"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[lib]
+name = "fxASPI"
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+
+[dependencies]
+anyhow = "1.0.102"
+ftail = "0.3.1"
+lazy_static = "1.5.0"
+libloading = "0.9.0"
+log = "0.4.32"

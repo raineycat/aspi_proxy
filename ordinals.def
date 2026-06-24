@@ -1,0 +1,12 @@
+LIBRARY fxASPI
+
+EXPORTS
+fxASPI_Init	@1
+fxASPI_CloseDevice	@5
+fxASPI_DataSize	@13
+fxASPI_GetDeviceNum	@3
+fxASPI_GetInquiry	@12
+fxASPI_OpenDevice	@4
+fxASPI_ReadData	@6
+fxASPI_SendVendorCommand	@8
+fxASPI_WriteData	@7
