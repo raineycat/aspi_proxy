@@ -14,6 +14,8 @@ lto = true
 
 [dependencies]
 anyhow = "1.0.102"
+base64 = "0.22.1"
+flate2 = "1.1.9"
 ftail = "0.3.1"
 lazy_static = "1.5.0"
 libloading = "0.9.0"

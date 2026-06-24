@@ -1,5 +1,7 @@
-use std::{ffi::c_void, path::PathBuf, ptr::slice_from_raw_parts};
+use std::{ffi::c_void, io::Write, path::PathBuf, ptr::slice_from_raw_parts};
 
+use base64::Engine;
+use flate2::{Compression, write::ZlibEncoder};
 use ftail::Ftail;
 use lazy_static::lazy_static;
 use libloading::Library;
@@ -44,6 +46,14 @@ fn load_original() -> Library {
             panic!("wawa!");
         }
     }
+}
+
+fn dump_binary(buf: &[u8]) -> String {
+    let mut enc = ZlibEncoder::new(Vec::new(), Compression::best());
+    enc.write_all(buf).unwrap();
+    let compressed = enc.finish().unwrap();
+    let text = base64::prelude::BASE64_STANDARD.encode(&compressed);
+    text
 }
 
 #[unsafe(no_mangle)]
@@ -103,7 +113,7 @@ unsafe extern "C" fn fxASPI_GetInquiry(idx: i32, buf: *mut c_void, size: u32) ->
         let result = func(idx, buf, size);
         log::debug!("fxASPI_OpenDevice({idx}, {buf:?}, {size}) -> {result}");
         let data = slice_from_raw_parts(buf as *const u8, size as usize);
-        log::debug!("Inquiry: {data:02X?}");
+        log::debug!("Inquiry: {}", dump_binary(&*data));
         return result;
     }
 }
@@ -130,7 +140,7 @@ unsafe extern "C" fn fxASPI_ReadData(idx: i32, buffer: *mut c_void, size: *mut u
         let size_val = *size;
         log::debug!("fxASPI_ReadData({idx}, {buffer:?}, {size_val}) -> {result}");
         let data = slice_from_raw_parts(buffer as *const u8, *size as usize);
-        log::debug!("Read: {data:02X?}");
+        log::debug!("Read: {}", dump_binary(&*data));
         return result;
     }
 }
@@ -144,7 +154,7 @@ unsafe extern "C" fn fxASPI_WriteData(idx: i32, buffer: *mut c_void, size: *mut 
         let size_val = *size;
         log::debug!("fxASPI_WriteData({idx}, {buffer:?}, {size_val}) -> {result}");
         let data = slice_from_raw_parts(buffer as *const u8, *size as usize);
-        log::debug!("Write: {data:02X?}");
+        log::debug!("Write: {}", dump_binary(&*data));
         return result;
     }
 }
@@ -159,7 +169,7 @@ unsafe extern "C" fn fxASPI_SendVendorCommand(idx: i32, cmd: *mut c_void) -> i32
         let result = func(idx, cmd);
         log::debug!("fxASPI_ReadData({idx}, {cmd:?}) -> {result}");
         let data = slice_from_raw_parts(cmd as *const u8, 10);
-        log::debug!("VendorCmd: {data:02X?}");
+        log::debug!("VendorCmd: {}", dump_binary(&*data));
         return result;
     }
 }
